@@ -41,6 +41,7 @@ FROM_PATH | *null* | A local path or s3 path you need to sync *from* (ex: `/data
 DEST_PATH | *null* | A local path or s3 path you need to sync *from* (ex: `/data` or `s3://mybucket/mypath/`)
 ALLOW_DELETE | false | if true, deletes will also be sync to DEST_PATH
 CRON | * * * * * |  a valid cron expression (ex: `*/5 * * * *` runs every 5 minutes). By default: every minutes.
+DOWNLOAD_ON_START | false |  if true, it will download all content of DEST_PATH back to FROM_PATH at launch
 
 
 ## Examples
@@ -48,8 +49,8 @@ CRON | * * * * * |  a valid cron expression (ex: `*/5 * * * *` runs every 5 minu
 * from a local folder to S3 path, allowing deletes, mounting a local volume:
 ```
 docker run --name s3sync \
-  -e AWS_ACCESS_KEY_ID=EXAMPLEID \
-  -e AWS_SECRET_ACCESS_KEY=MYSECRETKEY \
+  -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+  -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
   -e AWS_REGION=us-east-1 \
   -e FROM_PATH=/data \
   -e DEST_PATH=s3://mybucket/myfolder/ \
@@ -61,8 +62,8 @@ docker run --name s3sync \
 * from a S3 bucket to local folder, no deletes, no shared volume, hourly:
 ```
 docker run --name s3sync \
-  -e AWS_ACCESS_KEY_ID=EXAMPLEID \
-  -e AWS_SECRET_ACCESS_KEY=MYSECRETKEY \
+  -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+  -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
   -e AWS_REGION=us-east-1 \
   -e FROM_PATH=s3://mybucket/myfolder/ \
   -e DEST_PATH=/data \
