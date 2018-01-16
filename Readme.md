@@ -42,7 +42,7 @@ DEST_PATH | *null* | A local path or s3 path you need to sync *from* (ex: `/data
 ALLOW_DELETE | false | if true, deletes will also be sync to DEST_PATH
 CRON | * * * * * |  a valid cron expression (ex: `*/5 * * * *` runs every 5 minutes). By default: every minutes.
 DOWNLOAD_ON_START | false |  if true, it will download all content of DEST_PATH back to FROM_PATH at launch
-
+LINKED_CONTAINER | *null* | if set, the name of the container is killed when new files are synced
 
 ## Examples
 
@@ -71,3 +71,24 @@ docker run --name s3sync \
   -e CRON='0 * * * *' \
   sparklane/s3sync
 ```
+
+* from a S3 bucket to local folder, volume shared with other container:
+```
+docker run -d --name s3sync \
+  -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+  -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+  -e AWS_REGION=us-east-1 \
+  -e FROM_PATH=s3://$S3_BUCKET/html/ \
+  -e DEST_PATH=/usr/share/nginx/html/ \
+  -e ALLOW_DELETE=true \
+  -e LINKED_CONTAINER=nginx \
+  -v /usr/share/nginx/html \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  sparklane/s3sync
+docker run -d --name nginx -p 8080:80 \
+  --volumes-from s3sync \
+  nginx
+
+```
+Now if you upload a file named `index.html` to `s3://$S3_BUCKET/html/`, wait one minute (default CRON configuration) and go to `http://localhost:8080` and the content of your index.html is displayed.
+Make a change to `index.html`, upload it to s3 and after a minute refresh `http://localhost:8080`, you should see the page updated.
